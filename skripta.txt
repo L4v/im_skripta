@@ -1,0 +1,876 @@
+################################
+#  Skripta iz internet mreža   #
+#  by: Jovan Ivošević          #
+################################
+
+NAPOMENA:
+    
+    Ova skripta nije namenjena kao zamena za materijal za spremanje
+    ispita, puna je rupa. Ovo je samo produkt mog slobodnog vremena
+    i služi čisto kao podsetnik. Predavanja i vežbe su ekstra i bolje
+    objašnjavaju materiju od ove skripte.
+        
+
+1. Sadržaj
+    2.1 OSI model
+    2.2 Nivo 1 - Fizički nivo
+    2.3 Nivo 2 - Nivo veze
+    2.4 Nivo 3 - Mreže
+    2.5 Nivo 4 - Transportni nivo
+
+RFC dokumenti:
+
+    UDP                   - RFC 768
+    IP                    - RFC 791
+    ICMP                  - RFC 792
+    TCP                   - RFC 793
+    ARP                   - RFC 826
+    Prenos IP na Ether II - RFC 894
+    Prenos IP na 802.3    - RFC 1042
+    SLIP                  - RFC 1055
+    RIP                   - RFC 1058
+    Path MTU Discovery    - RFC 1191
+    PPP                   - RFC 1661
+    Privatno adresiranje  - RFC 1918
+
+2.1 OSI model
+
+    Open Systems Interconnection model jeste konceptualni model
+    koji omogućuje raznim komunikacionim sistemima da komuniciraju
+    pomoću standardnih protokola.
+    
+        7. Nivo - Aplikativni
+
+            Interfejs čoveka - kompjutera, pruža
+            pristup mreži korisniku.
+
+        6. Nivo - Nivo prezentacije
+            
+            Sprema podatke u prezentabilni oblik,
+            ovde se vrši enkripcija.
+
+        5. Nivo - Sesija
+            
+            Održava konekcije i zadužen je za
+            upravljanje portovima i sesijama.
+
+            4. Nivo - Transportni nivo
+            
+            Prenosi podatke pomoću protokola
+            poput UDP i TCP.
+
+        3. Nivo - Mreže
+            
+            Određuje fizičku putanju podataka.
+
+        2. Nivo - Nivo veze
+            
+            Definiše format podataka mreže.
+
+        1. Nivo - Fizički
+            
+            Prenosi "sirovi" niz bitova preko
+            fizičkog medijuma.
+
+
+2.2 Nivo 1 - Fizički nivo
+
+    Predstavlja prenos "sirovih" podataka, u vidu niza bitova, preko
+    fizičkog medijuma. Podaci na ovom nivou nemaju nikakvu interpretaciju,
+    samo se razaznaju bitovi.
+
+    2.2.1 Kodiranje
+        
+        Kako bismo obezbedili kvalitetan prenos podataka i jednoznačno
+        preneli informacije, upotrebljavamo kodiranje. Neke metode
+        kodiranja su:
+            
+            Data:       | 0 | 0 | 0 | 1 | 0 | 0 | 1 | 1 | 0 | 1 | 1 | 1 |
+            Clock:      |_--|_--|_--|_--|_--|_--|_--|_--|_--|_--|_--|_--|
+
+            _  Nizak signal
+            -- Visok signal
+
+            NRZ:        |___|___|___|---|___|___|---|---|___|---|---|---| 
+            
+            0 - Nizak signal
+            1 - Visok signal
+
+            RZ:         |___|___|___|--_|___|___|--_|--_|___|--_|--_|--_| 
+
+            0 - Nizak signal
+            1 - Skok i pad
+ 
+
+            NRZI:       |---|___|---|---|___|---|---|---|___|___|___|___| 
+
+            0 - Promena stanja 
+            1 - Održanje prethodnog stanja
+    
+            Manchester: |_--|_--|_--|--_|_--|_--|--_|--_|_--|--_|--_|--_| 
+
+            0 - Skok
+            1 - Pad
+
+            ...
+            
+ 
+2.3 Nivo 2 - Nivo veze
+    
+    Opisuje razmenu podataka između uređaja koji dele isti prenosni medijum.
+    Nudi rešenje sledećih problema:
+
+        Pristup prenosnom medijumu
+        Adresiranje uređaja povezanih na prenosni medijum
+        Kontrola protoka
+        Detekcija i korekcija grešaka
+
+    Gruba podela:
+        
+        LAN - Deljeni medijum (Ethernet, Token Ring)
+        WAN - Tačka-tačka veze (PPP i SLIP)
+
+    2.3.1 Deljeni medijum
+        
+        Deljeni medijum predstavlja medijum ili kanal prenosa informacija na
+        kom je prikačeno više od jednog korisnika u bilo kom vremenu.
+
+        Protokoli koju omogućuju ovakav vid komunikacije:
+            
+            IEEE 802.2 (LLC)
+            IEEE 802.3 (CSMA/CD)
+            IEEE 802.5 (Token Ring) # Zastarelo
+
+        ETHERNET FRAME
+
+            Predstavlja paket informacije drugog nivoa. Pre svakog frejma
+            stoji preambula koja ne spada u sadržaj frejma.
+
+            Ethernet II i IEEE 802.3 su dva različita standarda frejma koja
+            su u upotrebi. Metod identifikovanja standarda svodi se na dogovor
+            da Ethernet II u svom TYPE polju sadrži vrednost > 1500, a
+            Ethernet IEEE 802.3 sadrži vrednost <= 1500.
+
+            Prednost Ethernet II jeste jednostavnija implementacija, ali
+            zbog unapred nepoznate dužine, potrebna je alokacija maksimalne
+            dužine frejma.
+
+            Prednost Ethernet IEEE 802.3 jeste mogućnost optimizacije jer
+            je unapred poznata potrebna količina alokacije, ali je
+            komplikovanija implementacija.
+
+            Minimalna dužina Ethernet frejma je 64B.
+            Maksimalna dužina Ethernet frejma je 1518B.
+
+
+            +-+-+-+-+-+-
+            - NAMENA   +
+            + VELIČINA -
+            -+-+-+-+-+-+
+
+            B - jedinica byte (8 bita)
+
+            ETHERNET II
+            
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+                - DEST ADDR | SRC ADDR | TYPE    | INFO              | FCS |
+                + 6B        | 6B       | 2B      | 46B <= N <= 1500B | 4B  |
+                -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                DEST ADDR - Destination address, adresa onoga kome se šalje
+                            paket informacije.
+
+                SRC ADDR  - Source address, adresa onoga ko šalje paket
+                            informacije.
+                
+                TYPE      - Opisuje tip protokola trećeg nivoa koji je
+                            enkapsuliran u frejmu.
+                            ( > 1500)
+
+                INFO      - Podaci koje enkapsulira frejm.
+
+                FCS       - Frame Check Sequence, služi kao kontrolna suma.
+               
+
+            ETHERNET IEEE 802.3
+            
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+                - DEST ADDR | SRC ADDR | LENGTH  | DSAP | SSAP | CTRL | INFO | FCS |
+                + 6B        | 6B       | 2B      | 1B   | 1B   | 1B   | VAR  | 4B  |
+                -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                DEST ADDR - Destination address, adresa primaoca paketa.
+
+                SRC ADDR  - Source address, adresa pošiljaoca paketa.
+            
+                LENGTH    - Dužina INFO segmenta.
+                            ( <= 1500)
+                
+                DSAP      - Destination Service Access Point. 
+                SSAP      - Source Service Access Point
+                            Služe najčešće kao TYPE polje kod ETHERNET II.
+
+                CTRL      - Control Field, služi za mehanizme Quality of
+                            Service-a poput zadavanja prioriteta frejma.
+            
+                INFO      - Podaci koje enkapsulira frejm
+            
+                FCS       - Frame Check Sequence, služi kao kontrolna suma.
+
+                
+            Metodi pristupa deljenom medijumu
+                
+                Round Robin: svakoj stanici dodeljen period vremena tokom
+                             kog može da šalje podatke.
+
+                Reservation: stanice rezervišu vremenske periode za slanje
+                             podataka.
+        
+                Contention:  stanice su slobodne da pokušaju slanje u bilo kom
+                             trenutku.
+                
+            CSMA/CD
+
+                Carrier Sense Multiple Access / Collision Detection je metoda
+                koju koristi Ethernet 802.3 u kom se svi uređaji na mreži
+                takmiče za prvenstvo slanja podataka.
+
+                Procedura za inicijalizaciju prenosa:
+                    
+                    1. Ako frejm nije spreman, čekaj.
+
+                    2. Ako medijum nije slobodan, čekaj.
+
+                    3. Počni tranzmisiju i posmatraj moguće kolizije.
+
+                    4. Ako je došlo do kolizije, idi na CD, Collision Detected
+                       proceduru.
+
+                    5. Resetuj brojače retranzmisije i završi prenos frejma.
+
+                CD, Collision Detected procedura:
+
+                    1. Nastavi prenos sa kratkim signalom (jamming signal) 
+                       minimalnim periodom prenosa paketa kako bi svi uređaji
+                       detektovali koliziju.
+
+                    2. Povećaj retranzmisioni brojač.
+
+                    3. Ako je dostignut maksimalni broj pokušaja prenosa 
+                       (retranzmisije) prestani sa prenosom.
+
+                    4. Čekaj nasumičan period u zavisnosti od broja kolizija.
+
+                    5. Idi na korak 1. procedure za inicijalizaciju prenosa.
+
+
+
+                MAC / Ethernet / fizička adresa:
+
+                    48bit broj prikazan kao 6 dvocifrenih hex brojeva
+                    razdvojenih crtom, dvotačkom...
+
+                    Npr:
+
+                        3A:38:52:C4:69:B8
+                
+                    Prva 3 hex broja (24bit) predstavljaju OUI, Organizationally
+                    Unique Identifier, oznaka proizvođača.
+
+                    Poslednja 3 hex broja (24bit) predstavljaju NIC, Network
+                    Interface Controller, jedinstvena adresa Ethernet
+                    adaptera
+
+                Kolizioni domen:
+            
+                    Ako dve stanice prilikom istovremenog slanja izazovu
+                    koliziju, kaže se da one pripadaju kolizionom domenu.
+
+                Broadcast domen:
+
+                    Za dve stanice se kaže da pripadaju broadcast domenu
+                    akko jedna stanica može da primi frejm poslat na
+                    broadcast domen od strane druge stanice i obrnuto.
+
+                Hab (Hub):
+
+                    Uređaj koji radi na fizičkom nivou, nalik ripiterima.
+                    Primljen signal sa jednog ulaza, pojačaja i šalje na 
+                    druge portove. Fizički mreža može biti u obliku zvezde,
+                    ali logički je isto kao magistrala.
+
+                    Problem dolazi kada se na mrežu poveže veliki broj
+                    uređaja, te verovatnoća kolizije raste i mreža se
+                    usporava.
+
+                Svič (Switch):
+
+                    Predstavlja rešenje problema vezanih za hub. To je uređaj
+                    drugog nivoa koji povezuje radne stanice, habove i druge
+                    svičeve. Svič omogućuje prosleđivanje primljenog signala
+                    na tačno određeni izlazni port.
+
+                    Izlazni portovi određeni su preko tabele adresiranja.
+                    Analizirajući adrese Ethernet frejma, svič preko tabele
+                    adresiranja prosleđuje paket na određeni port.
+
+
+2.4 Nivo 3 - Mreže
+
+    Ako je Nivo 2 opisivao skup uređaja vezanih na isti prenosni medijum,
+    Nivo 3 opisuje prenos podataka između tih skupova i daje rešenje za
+    sledeće probleme:
+        
+        - Adresiranje skupova uređaja i samih uređaja.
+    
+        - Rutiranje - određivanje putanje prenosa paketa.
+
+    IP - internet protokol (RFC 791)
+
+        Predstavlja protokol trećeg nivoa koji opisuje način prenosa IP
+        paketa. Ovaj protokol ne garantuje isporuku, paketi su međusobno
+        nezavisni, njihova putanja može biti različita i redosled stizanja
+        na odredište je proizvoljan.
+
+
+    IP PAKET (DATAGRAM)
+
+        Predstavlja jedinicu prenosa informacije IP protokola. Prvih 5 redova
+        IP zaglavlja su obavezni.
+
+
+         0                   1                   2                   3
+         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |VERSION|  IHL  |TYPE OF SERVICE|          TOTAL LENGTH         |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |         IDENTIFICATION        |FLAGS|      FRAGMENT OFFSET    |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |  TIME TO LIVE |    PROTOCOL   |         HEADER CHECKSUM       |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |                       SOURCE ADDRESS                          |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |                    DESTINATION ADDRESS                        |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |                            OPTIONS                            |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |                              ...                              |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        |                              DATA                             |
+        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+        VERSION - Predstavlja oznaku verzije IP paketa (4 - IPv4 ili 6 - IPv6)
+        4 bit
+
+        IHL     - Internet Header Length jeste dužina header-a u 32-bitnim
+        4 bit     rečima posle kog počinje DATA segment. Minimalna vrednost
+                  za IHL je 5.
+
+        TOS     - Type of Service određuje tretman IP paketa prilikom
+        8 bit     transporta.
+
+        TL      - Total Length predstavlja ukupnu dužinu IP paketa u bajtima.
+        16 bit    Uzima u obzir Header i DATA deo.
+
+        ID      - Identification služi za identifikaciju fragmenata u slučaju
+        16 bit    fragmentacije.
+
+        FLAGS   - 3 kontrolna bita za fragmentaciju.
+        3 bit     Bit 0: rezervisan, uvek 0
+                      Bit 1: (DF) 0 = Može se fragmentirati, 1 = Ne fragmentiraj
+                      Bit 2: (MF) 0 = Poslednji fragment, 1 = Ima još frag.
+
+                      DF - Don't fragment
+                      MF - More fragments
+
+        FO      - Fragment Offset predstavlja offset posmatranog fragmenta u
+        13 bit    slučaju fragmentacije. Jedinica je 8 byte-a.
+
+        TTL     - Time to Live je pozitivan broj koji predstavlja preostalo
+        8 bit     vreme pre odbacivanja paketa, ako je 0 paket se 
+                  uništava.
+
+        PROTOCOL- Oznaka protokola sledećeg nivoa.
+        8 bit
+
+        HC      - Header Cheksum je kontrolna suma za Header.
+        16 bit
+
+        SA      - Source Address je polazna IP adresa.
+        32 bit
+
+        DA      - Destination Address je odredišna IP adresa.
+        32 bit
+
+        OPTIONS - Neobavezno polje promenljive dužine u kom se beleže određene
+                  opcije. Svaki IP modul mora implementirati ove opcije.
+                  Detaljnije u RFC dokumentu.
+
+        DATA    - Podaci koje prenosi IP paket.
+
+
+    IP adresa
+
+        32-bitni broj prikazan kao četiri decimalna broja razdvojena tačkom.
+        Primer:
+
+            IPv4 zapis:    192.168.21.23
+            Binarni zapis: 110000000101010000001010100010111
+
+        Sastoji se od dva dela:
+
+            ID mreže               - prvih N bitova
+            Oznaka sistema u mreži - ostatak
+
+
+        Određivanja broja N (dužine ID-a mreže):
+    
+            Podela na 5 klasa:
+
+                Klasa A: 1.0.0.0 - 127.255.255.255
+                
+                    Počinje sa 0
+                    7  bita za ID mreže
+                    24 bita za oznaku računara
+                    8  bit  default dužina maske
+
+                Klasa B: 128.0.0.0 - 191.255.255.255
+
+                    Počinje sa 10
+                    14 bita za ID mreže
+                    16 bita za oznaku računara
+                    16 bit  default dužina maske
+
+                Klasa C: 192.0.0.0 - 223.255.255.255
+
+                    Počinje sa 110
+                    21 bit  za ID mreže
+                    8  bita za oznaku računara
+                    24 bit  default dužina maske
+
+                Klasa D: 224.0.0.0 - 239.255.255.255
+
+                    Rezervisano za multicast
+
+                Klasa E: 240.0.0.0 - 255.255.255.255
+
+                    Rezervisano
+
+    IP mreža
+
+        Definiše se pomoću ID-a i mrežne maske. Mrežna maska predstavlja
+        broj uzastopnih jedinica koji određuje specifičnost ID-a. Maska
+        se može predstaviti brojem koji označava broj uzastopnih jedinica
+        posle kojih prati nula.
+
+        Primer:
+
+            IP adresa:            192.168.21.0
+            Mrežna maska:         255.255.255.0
+            (u binarnom zapisu ovaj broj je 24 jedinice i ostatak nule)
+
+            Može se zapisati kao: 192.168.21.0/24
+
+    Javni IP opseg:
+
+        Javna IP adresa predstavlja jedinstvenu adresu na Internetu koja
+        jednoznačno određuje tačku komunikacije. Organizacija zadužena
+        za koordinaciju osnovnih mehanizama na kojima je zasnovana
+        funkcionalnost interneta je IANA - Internet Assigned Numbers
+        Authority.
+
+    Privatni IP opseg:
+
+        Zbog ograničenog broja slobodnih IP adresa i zbog sve većeg broja mrežnih
+        uređaja vrši se određena podela. Pretpostavlja se da tačke sa javnim
+        adresama pripadaju složenijim mrežama koje funkcionišu primenom
+        TCP/IP familije protokola.
+
+        Privatne tačke:
+
+            Tačke koje direktno komuniciraju isključivo sa drugim privatnim
+            tačkama unutar svoje računarske mreže. Adrese privatnih tačaka
+            moraju biti jedinstvene samo unutar svoje privatne mreže. Njihovi
+            opsezi definisani su u RFC dokumentu 1918.
+
+        Javne tačke:
+
+            Tačke koje direktno komuniciraju sa drugim javnim tačkama.
+    
+        Ovakvom podelom na privatne i javne adrese dobija se
+        racionalnija upotreba javnih IP adresa, definisanje logičke
+        arhitekture složenih računarskih mreža i povećan stepen bezbednosti
+        računarske mreže.
+
+        Prenos IP paketa na lokalnoj mreži:
+
+            Za Ethernet II, RFC 894
+            Za 802.3,       RFC 1042
+
+            MTU - Maximum Transmission Unit je maksimalna veličina IP paketa
+            koji se može preneti u okviru osnovne jedinice prenosa protokola
+            u kom je enkapsuliran IP paket. Za Ethernet II MTU je 1500 byte.
+
+        ARP Mehanizam (RFC 826):
+
+            Pošto je dužina IP adrese 32 bita, a Ethernet adrese 48 bita, 
+            potreban je određen mehanizam mapiranja IP na Ethernet adresu.
+            Taj mehanizam je ARP, Address Resolution Protocol.
+
+            Ukoliko imamo računar A i računar B na istoj mreži. Oba računara
+            znaju svoju IP adresu i svoju Ethernet adresu. Računar A ima
+            IP adresu računara B, ali ne i Ethernet adresu.
+
+            A:                         B:
+
+                IP:  192.168.1.1           IP:  192.168.24.2.
+                MAC: 0:40:99:3:15:6        MAC: 0:4f:37:1:1f:51
+
+            Postupak dobavljanja Ethernet (MAC) adrese:
+
+                1. Računar A proverava svoj keš ukoliko ima keširanu MAC
+                   adresu za određenu IP adresu. Ako ima šalje Ethernet frejm
+                   sa IP paketom, inače nastavlja dalje sa ARP.
+
+                2. Računar A šalje ARP upit na Ethernet broadcast adresu,
+                   DST = ff:ff:ff:ff:ff:ff, SRC = 00:40:99:03:15:06
+                   zahtevajući MAC adresu uređaja sa IP adresom 192.168.24.2.
+
+                3. Svi računari na toj mreži osim računara B ignorišu ARP
+                   zahtev, a računar B odgovara sa svojom MAC i IP adresom
+                   računaru A. Takođe, računar B može da kešira MAC i IP
+                   adresu računara A u ARP tabelu.
+
+                4. Računar A prima ARP odgovor i unosi IP i MAC adresu
+                   računara B u svoju ARP tabelu.
+
+                5. Računar A i B sada mogu da komuniciraju.
+
+        RARP Mehanizam:
+    
+            Reverse Adress Resolution Protocol predstavlja obrnuti postupak
+            ARP-a, ali se danas koristi moderniji BOOTP ili DHCP.
+
+        IP na point to point vezama:
+
+            Adrese na drugom nivou ne postoje. Na prvom nivou može se
+            koristiti asinhroni ili sinhroni prenos. Dve metode IP
+            enkapsulacije na p-t-p vezama:
+
+                SLIP - Serial Line IP, opisan u RFC 1055, retko se
+                       koristi.
+
+                PPP  - Point to Point Protocol, opisan u RFC 1661, može služiti
+                       i za enkapsulaciju drugih protokola.
+
+
+        VLAN
+
+            Pošto korporativne mreže povezuju veliki broj stanica, kontrola
+            na drugom nivou je praktično nemoguća, bezbednost je narušena, kao
+            i funkcionalnost mreže. Veliki broadcast domenu mogu izazvati
+            prekide mreže.
+
+            Rešenje ovih problema jeste podela broadcast domena i njihovo
+            povezivanje putem trećeg nivoa.
+
+            Ideja jeste da se napravi "VLAN svič" koji frejmove primljene sa
+            jednog porta, može da šalje samo na portove koji pripadaju istoj
+            grupi kao i prijemni port. Koristi se IEEE 802.1Q standard i vrši
+            se "bojenje" frejmova, gde svaki obojeni frejm može da se šalje
+            samo na portove iste boje.
+
+            Ovo se postiže preko trećeg nivoa. Uređaji koji ovo omogućavaju su
+            ruteri i L3 (Layer 3) svičevi. IP sabnetovanje se poklapa sa
+            VLAN-om.
+
+        Ruter:
+            
+            Uređaj koji je specijalizovan za rutiranje. Takođe može vršiti
+            filtriranje saobraćaja i sl. funkcionalnosti.
+
+        Rutiranje:
+            
+            Utvrđivanje kome i kuda sistem treba da šalje IP pakete.
+            Prilikom konfigurisanja, svaki sistem u mreži dobija:
+
+                - Svoju IP adresu i mrežnu masku
+                - IP adresu rutera (gateway)
+                
+        Tabela rutiranja:
+    
+            Predstavlja tabelu podataka koja se čuva u ruteru ili host-u koja
+            izlistava rute za određene mrežne destinacije. Tabela sadrži 4
+            kolone:
+            
+                Network destination - Destinaciju na koju se šalje.
+
+                Netmask             - Maska za destinaciju.
+
+                Gateway             - adresa sledeće stanice kojoj se šalje.
+
+                Interface           - Interfejs na koji se šalje ka gateway-u.
+
+
+            Primer tabele rutiranja:
+
+            192.168.21.0    255.255.255.0   0.0.0.0         Eth0
+            192.168.24.0    255.255.255.0   192.168.21.99   
+            0.0.0.0         0.0.0.0         192.168.21.99
+
+            Prilikom primanja paketa, ruter proverava adresu na koju treba
+            da šalje paket i zatim je poredi sa adresom destinacije u tabeli
+            primenjujući odgovarajuču masku i šalje paket na onaj interfejs
+            koji ima najveće podudaranje. Ukoliko ne postoji takav unos u
+            tabeli, ruter šalje paket na tzv. Default Gateway, definisan
+            nulama u prvoj i drugoj koloni.
+
+            NAPOMENA: Rutiranje je mnogo bolje objašnjeno od strane asistenta
+                      na snimku sa vežbi.
+
+        Dinamičko rutiranje:
+
+            Kako bi izbegli ručno ažuriranje tabela rutiranje, koristimo
+            protokole dinamičkog rutiranja koji to rade umesto nas. To
+            su:
+
+            RIP, Routing Information Protocol (RFC 1058):
+            
+                Koristi vektor udaljenosti.
+
+                Metrika: udaljenost odredišta, sve veće od 16 smatra
+                         se kao beskonačno.
+
+                Problem: sporo konvergira u slučaju prekida veze.
+
+            OSPF, Open Shortest Path First (RFC 2328):
+            
+                Zasnovan na stanju veze, link-state. Ruteri razmenjuju
+                podatke o stanju svojih interfejsa sa susednim ruterima,
+                pa tako svaki ruter ima potpunu sliku topologije cele mreže.                
+         
+        ICMP (RFC 792):
+
+            Internet Control Message Protocol predstavlja protokol na istom
+            nivou kao IP, koji se zapravo enkapsulira u IP paket sa oznakom
+            protokola 1. Služi za dijagnostiku, upravljanje i poruke o
+            greškama. Npr.: program ping.
+
+            ICMP PACKET
+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |     TYPE      |     CODE      |          CHECKSUM             |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                             UNUSED                            |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |      INTERNET HEADER + 64 BITS OF ORIGINAL DATA DATAGRAM      |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+            Vrednosti IP paketa:
+
+                VERSION  = 0
+                IHL      = var
+                TOS      = 0
+                TTL      = var
+                TTL      = var
+                PROTOCOL = 1
+
+            TYPE  - Određuje tip ICMP poruke koja može da se odnosi na više
+            8 bit  događaja.
+
+            CODE  - Tačno ukazuje na događaj
+            8 bit
+
+            CHKSM - Checksum, kontrolna suma za ICMP paket.
+            16 bit
+
+
+            Ping: 
+
+                TYPE = 0 za echo reply
+                     = 8 za echo request
+                CODE = 0
+
+            Destination unreachable:
+
+                TYPE   = 3
+                CODE   = od 0 do 15
+                       = 0 link nije aktivan
+                       = 1 ARP zahtev ne dobija odgovor
+                       = 2 protokol nedostupan
+                       = 3 port nedostupan
+                       = 4 potrebna fragmentacija, ali DF je postavljen
+                       = izvorno rutiranje neuspelo
+                UNUSED = mora sve 0
+
+                Mora postojati IP zaglavlje paketa koji je izazvao grešku.
+                Iz 64 bita sadržaja IP paketa dobijamo informacije potrebne za
+                protokole višeg nivoa.
+                
+            Redirekcija:
+            
+                TYPE = 5
+                CODE = 0
+
+                Primer: tri povezane mreže, dva rutera na jednom segmentu.
+                Sistem zna samo za jedan ruter i njemu šalje saobraćaj koji
+                bi efikasnije bilo uputiti drugom ruteru. Ruter koji je primio
+                saobraćaj vraća ICMP REDIRECT poruku sa IP adresom pogodnijeg
+                rutera.
+
+
+2.5 Nivo 4 - Transportni nivo
+
+        Transportni nivo nudi transparentni prenos podataka između krajnih
+        korisnika. Upravlja pouzdanošću prenosa kontrolom protoka,
+        segmentacijom i upravljanjem greškama.
+
+        Port:
+        
+            Mreže se identifikuju IP adresama. Aplikacijama je potrebno
+            preciznije određivanje. Portovi predstavljaju lokalno
+            proširenje IP adrese, svaka IP adresa ima više portova.
+
+            16-bitni neoznačeni broj, 0 - 65535
+            Rezervisani: od 1 do 1023
+
+        UDP (RFC 768):
+
+            User Datagram Protocol predstavlja jednostavan protokol
+            pogodan za kratke poruke, do veličine MTU. UDP ne garantuje
+            isporuku. U IP paketu enkapsulira se sa PROTOCOL = 17.
+            
+            UDP PACKET
+
+             0      7 8     15 16    23 24    31
+            +--------+--------+--------+--------+
+            |     SOURCE      |   DESTINATION   |
+            |      PORT       |      PORT       |
+            +--------+--------+--------+--------+
+            |                 |                 |
+            |     LENGTH      |     CHECKSUM    |
+            +--------+--------+--------+--------+
+            |                                   |
+            |                DATA               |
+            +--------+--------+--------+--------+
+
+
+            SOURCE PORT - Port aplikacije koja šalje podatke.
+            16 bit
+
+            DEST. PORT  - Port aplikacije kojoj se šalju podaci.
+            16 bit
+
+            LENGTH      - Dužina UDP paketa u bajtima.
+            16 bit
+
+            CHEKSUM     - Kontrolna suma za zaglavlje i podatke.
+
+
+        TCP (RFC 793):
+        
+            Transmission Control Protocol je protokol četvrtog nivoa koji nudi
+            garanciju isporuke pod uslovom funkcionisanja protokola nižih
+            nivoa. Predviđen je za prenos niza podataka željene dućine, onako
+            kako posmatra aplikacija. U IP paketu enkapsulira se sa
+            PROTOCOL = 6.
+
+            TCP PACKET
+            
+             0      7 8     15 16    23 24    31
+            +--------+--------+--------+--------+
+            |     SOURCE      |   DESTINATION   |
+            |      PORT       |      PORT       |
+            +--------+--------+--------+--------+
+            |                                   |
+            |              SEQUENCE             |
+            +--------+--------+--------+--------+
+            |                                   |
+            |           ACKNOWLEDGMENT          |
+            +--------+--------+--------+--------+
+            |    |            |                 |
+            | HL |   FLAGS    |      WINDOW     |
+            +--------+--------+--------+--------+
+            |                 |                 |
+            |     CHEKSUM     |      URGENT     |
+            +--------+--------+--------+--------+
+            |                                   |
+            |                DATA               |
+            +--------+--------+--------+--------+
+
+
+            SOURCE PORT - Port aplikacije koja šalje podatke.
+            16 bit
+
+            DEST. PORT  - Port aplikacije kojoj se šalju podaci.
+            16 bit
+
+            SEQUENCE    - Broj sekvence prvog okteta u ovom segmentu.
+
+            ACK.        - Ukoliko je ACK kontrolni bit aktivan, ovo polje
+                          sadrži sledeći broj sekvence koji pošiljaoc
+                          očekuje. Kada se uspostavi konekcija, ovo se
+                          uvek šalje.
+
+            HL          - Header length.
+
+            WINDOW      - Broj okteta podataka počevši od onog u ACK polju
+                          koje pošiljaoc ovog segmenta želi da primi.
+
+
+            CHEKSUM     - Kontrolna suma segmenta.
+    
+            URGENT      - Pokazuje na broj sekvence okteta koji prati hitne
+                          podatke.
+    
+            Stanja veze TCP-a:
+
+                Fiktivno mirno stanje: CLOSED
+
+                Pasivno otvaranje    : LISTEN
+
+                Uspostavljanje veze  : SYN_SENT, SYN_RCVD
+
+                Uspostavljena veza   : ESTABLISHED
+
+                Aktivno zatvaranje   : FIN_WAIT_1, FIN_WAIT_2, CLOSING
+
+                Pasivno zatvaranje   : CLOSE_WAIT, LAST_ACK
+
+                Iz aktivnog zatvaranja se prelayi u stanje TIME_WAIT, a iz
+                pasivnog u CLOSED.
+
+
+            Uspostavljanje TCP veze:
+
+                TCP veza uspostavlja se pomoću three-way handshake-a.
+
+                    1. Klijent šalje SYN i prelazi u SYN_SENT
+
+                    2. Server prima SYN, šalje SYN+ACK i prelazi u SYN:RCVD
+
+                    3. Klijent prima SYN+ACK, šalje ACK i prelazi u ESTABL.
+
+                    4. Server prima ACK i prelazi u ESTABLISHED
+                
+
+                Za svaki smer veze se prilikom početne razmene nezavisno
+                dogovaraju sekvence i MSS (Maximum Segment Size), obično
+                MTU umanjen za 40 (IP + TCP dužina zaglavlja). Za MSS se
+                uzima manja od razmenjenih vrednosti.
+
+                TCP veza je dvosmerna i svaki smer se može nezavisno
+                zatvoriti. Veza čiji je jedan smer zatvoren je poluzatvorena
+                ili half-closed.
+
+            Path MTU discovery (RFC 1191):
+            
+                Način optimalnog odabira MSS vrednosti za neku vezu kako
+                bi se izbegla fragmentacija. Šalju se IP paketi sa aktivnim
+                DF flegom i MSS se smanjuje dok se dobija ICMP NEED_FRAG.
+
+        
+
