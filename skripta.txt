@@ -17,6 +17,7 @@ NAPOMENA:
     2.3 Nivo 2 - Nivo veze
     2.4 Nivo 3 - Mreže
     2.5 Nivo 4 - Transportni nivo
+    2.6 Nivo 5 - Nivo sesije
 
 RFC dokumenti:
 
@@ -26,12 +27,16 @@ RFC dokumenti:
     TCP                   - RFC 793
     ARP                   - RFC 826
     Prenos IP na Ether II - RFC 894
+    DNS                   - RFC 1034
+    DNS                   - RFC 1035
     Prenos IP na 802.3    - RFC 1042
     SLIP                  - RFC 1055
     RIP                   - RFC 1058
     Path MTU Discovery    - RFC 1191
     PPP                   - RFC 1661
     Privatno adresiranje  - RFC 1918
+    SMTP                  - RFC 2821
+    MAIL                  - RFC 2822
 
 2.1 OSI model
 
@@ -967,5 +972,344 @@ RFC dokumenti:
                 bi se izbegla fragmentacija. Šalju se IP paketi sa aktivnim
                 DF flegom i MSS se smanjuje dok se dobija ICMP NEED_FRAG.
 
+2.6 Nivo 5 - Nivo sesije        
+
+    Nivo sesije nudi mehanizme potrebne za otvaranje, zatvaranje i održavanje
+    sesije između aplikacija krajnih korisnika.
+
+    DNS (RFC 1034, 1035):
+
+        Domain Name System jeste distribuirani sistem za opis hijerarhijski
+        organizovanih skupova imena i pridruživanje različitih vrsta podataka
+        tim imenima. Za DNS upite, koristi se rezervisani UDP port 53.
+
+        Npr.:   mail.example.org - 192.168.24.1
+
+        FQDN, Fully Qualified Domain Name predstavlja pun naziv domena koji
+        u potpunosti opisuje lokaciju tok domena u hijerarhiji DNS-a. FQDN
+        se zapisuje oznakama s leva na desno, od najspecifičnije ka najmanje
+        specifičnom, odvajajući oznake tačkama. Vrh hijerarhije NEMA IME.
+
+        Primer DNS hijerarhije:
+
+           
+                                            |
+                                            |
+                    +-------------+---------+---------+----------------+
+                    |             |                   |                |
+                   MIL           EDU                 GOV              COM
+                    |             |                   |                |
+                    |             |                   |                |
+               +----+----+     +--+--+             +--+------+      EXAMPLE
+               |         |     |     |             |         |         |
+            PENTAGON   DARPA  MIT   YALE          NSF   WHITEHOUSE     |
+                                                                   +---+---+
+                                                                   |       |
+                                                                  MAIL   WATSON
+                                                                   |
+                                                                   |
+                                                                 PUBLIC
+
+        FQDN dobijamo šetanjem kroz stablo od lista ka korenu (koren NEMA
+        ime), pa za mit dobijamo:
+            
+             mit.edu. <--- Ova tačka na kraju se piše i označava korenski čvor
+                           ali današnji pretraživači podržavaju kucanje adrese
+                           i bez krajnje tačke.
+
+        Neke pretpostavke:
+
+            - Dostupnost podataka bitnija je od njihove ažurnosti.
+
+            - Podaci sistema se sporo menjaju.
+
+            - U sistemu je obezbeđena redundantnost (distribuiran je sistem).
+
+            - Granice administrativne odgovornosti podataka se uglavnom
+              poklapaju sa organizacionom strukturom institucija koje 
+              podatke održavaju.
+
+        Organizacija:
+
+            Područje odgovornosti nekog servera zove sezona. Podaci o zonama
+            lokalno se čuvaju za primarne, a sekundarni serveri od njih
+            preuzimaju podatke.
+
+            Server može delegirati odgovornost za deo neke zone drugim
+            serverima. Primer zone za example.org:
+
+
+                example.org     IN  SOA     ns.example.org. root.example.org. (
+                                            1999120300      ; serial
+                                            4320            ; reload
+                                            1800            ; retry
+                                            6048700         ; expire
+                                            86400)          ; minimum TTL
+                                    NS      ns.example.org.
+                                    MX      0   mail.example.org.
+                ns                  A       192.168.24.2
+                mail                A       192.168.24.1
+                blast               CNAME   blob.example.org.
+                blob                A       192.168.24.3
+                                    MX      0   blob.example.org.
+                                    MX      10  mail.example.org.
+
+
+            Svaka stavka se zove RR, Resource Record. Elementi RR su:
+            ime, klasa, tip, podaci. Tipovi RR:
+
+                - SOA, Start of Authority, početak zone
+
+                    Ime:    example.org.
+                    Klasa:  IN
+                    Tip:    SOA
+                    Podaci:
+                            ns.example.org.   - ime name servera
+                            root.example.org. - ime koje specificira mailbox za
+                                                zonu
+                            1999120300        - verzija zone
+                            4320              - vreme za proveru ažurnosti
+                                                sekundarnog servera, u
+                                                sekundama
+                            1800              - vreme za ponovni pokušaj
+                                                provere ažurnosti, u
+                                                sekundama
+                            604800            - vreme posle kog podaci u
+                                                sekundarnom serveru više
+                                                ne važe, u sekundama
+                            86400             - rok trajanja validnosti
+                                                odgovora za ovu zonu, u
+                                                sekundama
+
+                - NS, Name Server zone
+
+                    Ime:    example.org
+                    Klasa:  IN
+                    Tip:    NS
+                    Podaci: 
+                            ns.example.org. - specifikacija odgovornog sistema
+                                              za zonu
+
+                - A, Address, vezuje ime za adresu
+
+                    Ime:    mail.example.org
+                    Klasa:  IN
+                    Tip:    NS
+                    Podaci: 
+                            IP adresa - 192.168.24.2
+
+                - CNAME, Canonical Name, dodeljuje alias (alternativno ime)
+                  imenu koje je sa A tipom RR dodeljeno IP adresi
+    
+                    Ime:    blast.example.org
+                    Klasa:  IN
+                    Tip:    CNAME
+                    Podaci:
+                            blob.example.org - originalno ime sistema
+
+                - MX, Mail Exchanger
+
+
+        DNS lookup, dobavljanje DNS odgovora:
+
+            Kada u pretraživaču ukucamo www.example.org, on za nas uradi
+            DNS lookup, tj. pokuša da pronađe IP adresu koja je mapirana
+            na taj naziv domena. Lookup se izvršava u sledećim koracima:
+
+                1. Klijent (računar u ovom primeru) u svojoj lokalnoj memoriji
+                   pronalazi IP adresu svog DNS servera, koja je podešena ručno
+                   ili je dobijena od rutera. Ta IP adresa je najčešće adresa
+                   ISP-a (Internet Service Provider).
+
+                   Razlog za postojanje DNS servera jeste da se ne preoptereti
+                   klijentska mašina, tako što će DNS server umesto izvršiti
+                   pretragu koju joj prosledi klijent. DNS server koji vrši
+                   pretragu umesto klijenta naziva se Resolver, a upit za ovakvu
+                   pretragu naziva se Recursive Query.
+
+                2. Klijent ISP-u šalje zahtev za www.example.org.
+
+                3. Ukoliko ISP prvi put vidi ovaj zahtev (nema
+                   keširano), on dalje prosleđuje zahtev DNS serveru zaduženog
+                   za vrh hijerarhije, ROOT server (bezimeni koren, ".").
+
+                4. ROOT server ne zna kome pripada www.example.org., ali će
+                   preusmeriti ISP na TLD (Top Level Domain) server koji je 
+                   zadužen za domene poput .com, .org, itd.
+
+                5. ISP šalje upit TLD serveru. TLD server ne zna kome pripada
+                   www.example.org, ali preusmerava ISP ka Authoratitive
+                   Name Serveru, koji je zadužen za taj domen.
+
+                6. ISP šalje upit Authoratitive Name Serveru, koji ISP-u
+                   vraća IP adresu od www.example.org.
+
+                7. ISP prosleđuje tu IP adresu klijentu.
+
+
+                Slika iz RFC dokumenta koja opisuje gore navedeni postupak,
+                prilagođena za www.example.org primer.
+                
+
+                             Local Host                        |  Foreign
+                                                               |
+                +---------+ user queries  +----------+         |  +--------+
+                |         | (example.org) |          |queries  |  |        |
+                |  User   |-------------->|          |---------|->|Foreign |
+                | Program |               | Resolver |         |  |  Name  |
+                |(Klijent)|<--------------|   (ISP)  |<--------|--| Server |
+                |         | user responses|          |responses|  | (ROOT, |
+                +---------+ (IP address)  +----------+         |  |  TLD,  |
+                                            |     A            |  |  ANS)  |
+                            cache additions |     | references |  +--------+
+                                            V     |            | 
+                                          +----------+         |
+                                          |  cache   |         | 
+                                          +----------+         | 
+                                                     
+
+        RDNS, Reverse DNS:
+    
+            DNS predstavlja adresar koji mapira naziv na IP adresu servera,
+            kao što bi u imeniku mapirali Petar Peric na 021-12345678.
+            Problem nastaje kada želimo da uradimo obrnuto, da preko IP adrese
+            saznamo naziv, tj. analogno telefonskom imeniku, preko broja
+            telefona, saznamo ime korisnika.
+
+            DNS lookup:
+
+                Kao što smo videli, DNS je podeljen u zone. Vlasnik zone mapira
+                IP adrese na njihove nazive domena. Npr:
+                pretražimo ns.example.org i dobijemo IP 192.168.24.2
+
+            RDSN lookup:
+
+                Ako želimo da uradimo obrnuto, konsultujemo PTR record, zapis
+                pointera koji mapira IP adresu na njen naziv domena. Dodavanje
+                se vrši na sledeći način:
+    
+                Obrnemo IP adresu: 2.24.168.192 i dodamo pseudo-domen:
+                in-addr.arpa. i dobijemo 2.24.168.192.in-addr.arpa.
+
+                IP adresu smo obrnuli jer njene cifre u decimalnom zapisu, u
+                obrnutom redosledu čine nivoe hijerarhije koje razgraničavaju
+                zone. Pseudo-zona je zapravo zona u kojoj se čuva PTR record.
+
+                PTR tip RR izgleda ovako:
+
+                    2   PTR ns.example.org.
+
+            Primer značaja RDNS-a:
+
+                Kod mail klijenata, RDNS se koristi kao način detekcije spama.
+                Kada neko pošalje email sa adrese pera@example.com, primajući
+                server proverava da li IP adresa tog servera ima RDNS zapis
+                vezan za example.com, ako nema zapis u RDNS-u, to je najčešće
+                znak spama i mejl primljen od takvog servera najčešće se
+                odbacuje. 
+
+                                
+    SMTP (RFC 2821):
+
+        Simple Mail Transfer Protocol je protokol koji definiše postupak
+        slanja e-mail-a. SMTP koristi rezervisani TCP port 25. Ovaj protokol
+        realizovan je komunikacijom u kojoj klijent serveru šalje ASCII
+        poruke, na koje server odgovara numeričkim odgovorima.
+
+        Komande klijenta:
+
+            "HELO | HELLO | EHLO" <domain>  - Identifikacija
+            "MAIL FROM:" <domain>           - Ko šalje
+            "RCPT TO:" <domain>             - Kome šalje
+            "DATA"                          - Oznaka da slede podaci
+            "QUIT"                          - Kraj sesije
+
+        Odgovori servera:
+
+            2xx - Confirm
+            3xx - Očekuje još podataka
+            4xx - Privremena greška
+            5xx - Trajna greška
+            
+            
+
+        Primer SMTP konverzacije između servera i klijenta:
+
+        << 220 mail.example.org SMTP
+        >> HELLO mail.example.com
+        << 250 mail.example.com
+        >> MAIL FROM: <john.smith@example.com>
+        << 250 ok
+        >> RCPT TO: <john.doe@example.com>
+        << 250 ok
+        >> DATA
+        << 354 go ahead
+        >> From: John Smith <john.smith@example.com>
+        >> Subject: Hello mail
+        >>
+        >> Hello!
+        >> .
+        << 250 ok 944228815 qp 2790
+        >> QUIT
+        << 221 mail.example.com
+
+    Mail adresa (RFC 2822):
+    
+        Klijent preko mail adrese saznaje sa kojim serverom je potrebno da
+        ostvari TCP konekciju. Mail adresa sastoji se od lokalnog dela i
+        domena i zapisuje se u vidu lokalni_deo@domen.
+
+        Primer: john.doe@example.org
+
+                lokalni: john.doe
+                domen:   example.org
         
+        Na osnovu domena, šalju se DNS upiti koji vraćaju odredišnu adresu
+        potrebnu za TCP konekciju. Ovaj postupak opisan je u RFC 974
+        dokumentu. U DNS tabeli domen može biti imenovan kao A, CNAME ili
+        MX RR zapis.
+
+        Mehanizam isporuke (primer za example.org, pogledati DNS tabelu gore):
+
+            Klijent šalje CNAME DNS upit za domen example.org
+
+                1 Klijent dobije kanonično ime:
+                    blast CNAME blob.example.org
+                    
+                    Klijent šalje MX DNS upit za dobijeno ime:
+
+                    1.1 Klijent dobije odgovore:
+                        
+                        Klijent gleda vrednost MX-a i šalje DNS upit za
+                        IP adresu onog ko ima najmanju vrednost (najviši
+                        prioritet), ako može, ostvaruje TCP konekciju, inače
+                        ide na sledeći MX.
+
+                    1.2 Klijent dobija prazan odgovor:
+
+                        Klijent šalje DNS upit za IP adresu ranije dobijenog
+                        kanoničkog imena i kad je dobije, ostvaruje TCP vezu.
+
+                2 Klijent dobije prazan odgovor na CNAME DNS upit:
+
+                    Klijent šalje MX DNS upit za domen iz mail adrese,
+                    example.org:
+
+                        2.1 Klijent dobije odgovore:
+                                MX 0 mail.example.org
+
+                            Klijent gleda vrednost MX-a i šalje DNS upit za IP
+                            adresu onoga ko ima najmanju vrednost, tj. najviši
+                            prioritet i ako može ostvaruje TCP konekciju,
+                            inače ide dalje na sledeći MX.
+
+                        2.2 Klijent dobija prazan odgovor:
+
+                            Klijent šalje DNS upit za IP adresu domena iz mail
+                            adrese i kada je dobije ostvaruje TCP vezu.
+
+            Kako bi se teret skinuo sa klijenta, koriste se Relay serveri
+            koji za određenu mrežu ili skupove mreža i oni vrše funkciju
+            mail posrednika.
+
 
