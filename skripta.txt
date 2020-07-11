@@ -79,7 +79,7 @@ RFC dokumenti:
     fizičkog medijuma. Podaci na ovom nivou nemaju nikakvu interpretaciju,
     samo se razaznaju bitovi.
 
-    2.2.1 Kodiranje
+    Kodiranje
         
         Kako bismo obezbedili kvalitetan prenos podataka i jednoznačno
         preneli informacije, upotrebljavamo kodiranje. Neke metode
@@ -113,6 +113,101 @@ RFC dokumenti:
             1 - Pad
 
             ...
+
+    Struktuirano kabliranje
+
+        Predstavlja dizajn i instalaciju kablirajućeg sistema koji je diktiran
+        grupom standarda. Struktuirano kabliranje cilja da pruži punu
+        fleksibilnost prilikom priključenja krajnjih uređaja, nezavisnost od
+        LAN tehnologija, mogućnost prenosa raznih tipova podataka i
+        garantovane karakteristike u propusnom opsegu.
+
+        Kablovski sistem je podeljen u sledeće podsisteme:
+
+            1. Kampus kabliranje
+
+                Kabliranje koje spaja kampus distributer sa distributerom
+                zgrade.
+
+            2. Ulazak u objekte
+
+                Mesto gde se spoljašnje kabliranje povezuje sa unutrašnjim
+                kabliranjem.
+
+            3. Prostorije za opremu
+
+                Prostor u kom se smeštaju telekomunikacioni ormari i oprema.
+
+            4. Vertikalno kabliranje
+
+                Kabliranje koje spaja distributer zgrade sa distributerom
+                sprata.
+
+            5. Telekomunikacioni ormari
+
+                Ormari u kojima se smešta pasivna oprema na kojoj se
+                završavaju kablovi kampus, vertikalnog i horizontalnog
+                kabliranja i u kojima se vrše sva potrebna prespajanja.
+
+            6. Horizontalno kabliranje
+
+                Kabliranje koje spaja distributer sprata sa priključnom
+                kutijom.
+
+            7. Radne prostorije
+
+                Predstavlja radni prostor krajnjih korisnika u kom se nalaze
+                korisnički uređaji (računari, telefon, ...), priključne kutije
+                korisnički kablovi, itd.
+
+                Broj priključnih mesta zavisi od broja radnih mesta. Broj
+                radnih mesta radnog prostora zavisi od namene prostora i
+                njegove površine. Najčešće se za radno mesto uzima početna
+                površina od 10m² koja se zatim inkrementira za 5m² za svako
+                novo radno mesto.
+
+                Svako radno mesto mora biti opremljeno sa minimalno dva
+                priključna mesta, a u praksi se kao optimalno prikazalo četiri
+                priključna mesta po radnom mestu.
+
+                Dakle odnos radnog mesta i broja priključaka bi trebao da
+                izgleda nešto ovako:
+
+
+                    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+                    | POVRŠINA [m²] | RADNA_MESTA | BR_PRIKLJUČAKA |
+                    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+                    |       10      |      1      |        4       |
+                    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+                    |       15      |      2      |        8       |
+                    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+                    |       20      |      3      |       12       |
+                    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+                    |       25      |      4      |       16       | 
+                    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+                    |                     ...                      |
+                    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+
+                Ukoliko je broj radnih mesta / porvšina i broj priključaka
+                neusklađen, posmatra se najveća vrednost. Npr:
+
+                    Nakon renoviranja i proširenja poslovnog objekta nalazi
+                    se postojeća kancelarija površine 25m² u kojoj je trenutno
+                    3 radna mesta. Ako za svako radno mesto koristimo četiri
+                    priključna mesta, broj priključnih mesta za ovu prostoriju
+                    je 16. (Postoje 3 radna mesta, ali površina je 25m², pa
+                    ćemo posmatrati površinu za određivanje broja potrebnih
+                    priključaka).
+
+                    Nakon renoviranja i proširenja poslovnog objekta nalazi
+                    se postojeća kancelarija površine 25m² u kojoj je trenutno
+                    6 radnih mesta. Ako za svako radno mesto koristimo četiri
+                    priključna mesta, broj priključnih mesta za ovu prostoriju
+                    je 24. (Iako je prostorija površine 25m², u njoj već
+                    postoji 6 radnih mesta, te posmatramo broj radnih mesta
+                    za određivanje broja potrebnih priključaka).
+
+
             
  
 2.3 Nivo 2 - Nivo veze
@@ -130,7 +225,7 @@ RFC dokumenti:
         LAN - Deljeni medijum (Ethernet, Token Ring)
         WAN - Tačka-tačka veze (PPP i SLIP)
 
-    2.3.1 Deljeni medijum
+    Deljeni medijum
         
         Deljeni medijum predstavlja medijum ili kanal prenosa informacija na
         kom je prikačeno više od jednog korisnika u bilo kom vremenu.
