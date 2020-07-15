@@ -572,6 +572,55 @@ RFC dokumenti:
 
             Može se zapisati kao: 192.168.21.0/24
 
+        U slučaju da dobijemo neku IP adresu zajedno sa mrežnom maskom, 
+        možemo izračunati adresu mreže, opseg IP adresa, kao i broadcast
+        adresu.
+
+            Primer:     69.123.11.55/21
+    
+            Ako IP i netmask konvertujemo u binarni zapis dobićemo:
+
+                        IP:      01000101.01111011.00001011.00110111
+                        NETMASK: 11111111.11111111.11111000.00000000
+
+            Adresu mreže dobijamo izvršavanjem AND operacije:
+
+                        IP:      01000101.01111011.00001011.00110111
+                        NETMASK: 11111111.11111111.11111000.00000000
+                        AND      -----------------------------------
+                        NET ID:  01000101.01111011.00001000.00000000
+    
+            Što u decimalnom zapisu daje:
+
+                            NET ID: 69.123.8.0
+
+            Broadcast adresu dobijamo izvršavanjem OR operacije nad
+            invertovanom mrežnom maskom:
+
+                        IP:        01000101.01111011.00001011.00110111
+                        INVMASK:   00000000.00000000.00000111.11111111
+                        OR:        -----------------------------------
+                        BROADCAST: 01000101.01111011.00001111.11111111
+
+            Što u decimalnom zapisu daje:
+    
+                        BROADCAST: 69.123.15.255
+
+            Prvu slobodnu IP adresu dobijamo povećavanjem NET ID-a za 1, a
+            poslednju slobodnu smanjenjem BROADCAST za 1:
+
+                        MIN IP: 69.123.8.1
+                        MAX IP: 69.123.15.254
+
+
+            Dakle nasa mreža izgleda ovako:
+
+            ID mreže:  69.123.8.0
+            Broadcast: 69.123.15.255
+            Min IP:    69.123.8.1
+            Max IP:    69.123.15.254
+
+
     Javni IP opseg:
 
         Javna IP adresa predstavlja jedinstvenu adresu na Internetu koja
